@@ -121,13 +121,13 @@ export const checkEmail = AsyncHandler(async (req, res) => {
     const { email } = req.body;
 
     const checkUserEmail = await User.findOne({ email }).select("-password");
-    if (!checkEmail) {
+    if (!checkUserEmail) {
       return res.status(400).json({
         message: "user not found",
       });
     }
-    res.status(200).json({
-      message: "email verify",
+    return res.status(200).json({
+      message: "email verified",
       succes: true,
       data: checkUserEmail,
     });
@@ -143,15 +143,16 @@ export const cheakPassword = AsyncHandler(async (req, res) => {
   const { password, userID } = req.body;
 
   const user = await User.findById(userID);
+  console.log(user)
 
   if (!user) {
-    req.status(400).json({
+    return res.status(400).json({
       message: "no user found ",
     });
   }
   const newpassword = await user.isPasswordCorrect(password);
   if (!newpassword) {
-    req.status(400).json({
+    return res.status(400).json({
       message: "passwword is wrong ",
     });
   }
@@ -168,7 +169,7 @@ export const cheakPassword = AsyncHandler(async (req, res) => {
     secure:true
   }
   return res.cookie('token',token,opsation).status(200).json({
-    message: "login succes fully",
+    message: "login succesfully",
     data: token,
     succes: true,
   });
@@ -177,7 +178,7 @@ export const cheakPassword = AsyncHandler(async (req, res) => {
 export const currentUser=AsyncHandler(async(req,res)=>{
   const token=req.cookies?.token||""
   if(!token){
-    res.status(400).json({
+    return res.status(400).json({
       message:"no token found"
     })
   }

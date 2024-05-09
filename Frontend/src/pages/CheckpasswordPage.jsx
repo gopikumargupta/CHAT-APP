@@ -10,24 +10,19 @@ import Avtar from "../component/Avtar.jsx";
 function CheckpasswordPage() {
   const [data, setData] = useState([
     {
-      
       password: "",
-      
     },
   ]);
 
-  
   const Navigate = useNavigate();
-  const location=useLocation()
-  
-  useEffect(()=>{
-    if(!location?.state?.name){
-      Navigate('/email')
+  const location = useLocation();
 
+  useEffect(() => {
+    if (!location?.state?.name) {
+      Navigate("/email");
     }
+  }, []);
 
-  },[])
-  
   const handleOnchange = (e) => {
     const { name, value } = e.target;
     setData((prev) => {
@@ -37,30 +32,26 @@ function CheckpasswordPage() {
       };
     });
   };
-  
+
   const handleSubmet = async (e) => {
     e.preventDefault();
     e.stopPropagation();
     const url = `${import.meta.env.VITE_BACKEND_URL}/password`;
+    console.log(url);
     try {
-      const response = await axios({
-        method:'post',
-        
-        url,
-        data:{
-          userId:location?.state?._id,
-          password:data.password
-
+      const response = await axios(
+        {
+          method: "post",
+          url,
+          data: { userID: location?.state?._id, password: data.password },
         },
-        withCredentials:true
-      });
-      
-      toast.success(response.data.message);
+        { withCredentials: true }
+      );
+
+      toast.success(response?.data?.message);
       if (response.data.succes) {
         setData({
-          
           password: "",
-          
         });
         Navigate("/");
       }
@@ -72,21 +63,20 @@ function CheckpasswordPage() {
   return (
     <div className="mt-5">
       <div className="bg-white  w-full max-w-sm  rounded overflow-hidden p-4 mx-auto">
-      <div className="w-fit mx-auto mb-2 flex justify-center items-center flex-col">
-        <Avtar
-        width={70}
-        name={location?.state?.name}
-        hight={70}
-        profile_url={location?.state?.profile_url}/>
+        <div className="w-fit mx-auto mb-2 flex justify-center items-center flex-col">
+          <Avtar
+            width={70}
+            name={location?.state?.name}
+            hight={70}
+            profile_url={location?.state?.profile_url}
+          />
 
-        <h2 className="font-semibold text-lg mt-1" >{location?.state?.name}</h2>
-
+          <h2 className="font-semibold text-lg mt-1">
+            {location?.state?.name}
+          </h2>
         </div>
 
-        
-        
         <form className="grid gap-4 mt-3" onSubmit={handleSubmet}>
-          
           <div className="flex flex-col">
             <label htmlFor="password">Password :</label>
             <input
@@ -100,16 +90,17 @@ function CheckpasswordPage() {
               required
             />
           </div>
-          
-          
+
           <button className="bg-green-400 text-lg px-4 py-1 hover:bg-sky-400 rounded mt-4 font-bold text-white leading-relaxed tracking-wide">
             Login
           </button>
         </form>
         <p className="my-3 text-center">
-          
-          <Link to={"/forgot_password"} className="hover:text-red-300 font-semibold">
-           Forgot Password ?
+          <Link
+            to={"/forgot_password"}
+            className="hover:text-red-300 font-semibold"
+          >
+            Forgot Password ?
           </Link>
         </p>
       </div>

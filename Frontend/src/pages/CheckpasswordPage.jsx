@@ -6,16 +6,20 @@ import axios from "axios";
 import toast from "react-hot-toast";
 import { FaRegCircleUser } from "react-icons/fa6";
 import Avtar from "../component/Avtar.jsx";
+import { useDispatch } from "react-redux";
+import { setToken, setUser } from "../Redux/UserSlice.jsx";
 
 function CheckpasswordPage() {
   const [data, setData] = useState([
     {
       password: "",
+      userID : ""
     },
   ]);
 
   const Navigate = useNavigate();
   const location = useLocation();
+  const dispatch = useDispatch();
 
   useEffect(() => {
     if (!location?.state?.name) {
@@ -36,20 +40,26 @@ function CheckpasswordPage() {
   const handleSubmet = async (e) => {
     e.preventDefault();
     e.stopPropagation();
-    const url = `${import.meta.env.VITE_BACKEND_URL}/password`;
-    console.log(url);
+    const URL = `${import.meta.env.VITE_BACKEND_URL}/password`;
+
     try {
-      const response = await axios(
-        {
-          method: "post",
-          url,
-          data: { userID: location?.state?._id, password: data.password },
-        },
-        { withCredentials: true }
-      );
+      console.log(location?.state?._id),
+      console.log(data.password)
+        const response = await axios({
+          method :'post',
+          url : URL,
+          data : {
+            userID : location?.state?._id,
+            password : data.password
+          },
+          withCredentials : true
+        });
 
       toast.success(response?.data?.message);
+
       if (response.data.succes) {
+        dispatch(setToken(response?.data?.token));
+        localStorage.setItem("token", response?.data?.token);
         setData({
           password: "",
         });

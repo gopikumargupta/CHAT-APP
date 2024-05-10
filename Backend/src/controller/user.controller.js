@@ -170,13 +170,14 @@ export const cheakPassword = AsyncHandler(async (req, res) => {
   }
   return res.cookie('token',token,opsation).status(200).json({
     message: "login succesfully",
-    data: token,
+    token: token,
     succes: true,
   });
 });
 
 export const currentUser=AsyncHandler(async(req,res)=>{
   const token=req.cookies?.token||""
+  console.log(token)
   if(!token){
     return res.status(400).json({
       message:"no token found"

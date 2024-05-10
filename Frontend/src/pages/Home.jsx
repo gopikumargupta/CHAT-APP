@@ -18,10 +18,11 @@ function Home() {
     try {
        
        const response = await axios({
-        method:'get',
-        url : URL,
         
-      },{withCredentials : true})
+        url : URL,
+        withCredentials : true
+        
+      },)
 
 
 

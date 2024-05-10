@@ -5,7 +5,7 @@ import jwt from 'jsonwebtoken'
 
 export const generateAccessAndRefereshToken = async (userID) => {
   try {
-    console.log(userID);
+    
     const user = await User.findOne(userID);
 
     const accesstoken = user.genrateAccesToken();
@@ -143,7 +143,7 @@ export const cheakPassword = AsyncHandler(async (req, res) => {
   const { password, userID } = req.body;
 
   const user = await User.findById(userID);
-  console.log(user)
+  
 
   if (!user) {
     return res.status(400).json({
@@ -177,7 +177,7 @@ export const cheakPassword = AsyncHandler(async (req, res) => {
 
 export const currentUser=AsyncHandler(async(req,res)=>{
   const token=req.cookies?.token||""
-  console.log(token)
+  
   if(!token){
     return res.status(400).json({
       message:"no token found"

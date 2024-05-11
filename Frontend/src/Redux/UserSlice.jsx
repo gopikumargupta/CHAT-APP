@@ -5,7 +5,8 @@ const initialState = {
   name:"",
   email:"",
   profile_pic:"",
-  token:""
+  token:"",
+  onlineUser:[]
 }
 
 export const userSlice = createSlice({
@@ -13,7 +14,7 @@ export const userSlice = createSlice({
   initialState,
   reducers: {
     setUser:(state,actions)=>{
-        state._id=actions.payload.id,
+        state._id=actions.payload._id,
         state.name=actions.payload.name,
         state.email=actions.payload.email,
         state.profile_pic=actions.payload.profile_pic
@@ -29,6 +30,9 @@ export const userSlice = createSlice({
         state.profile_pic="",
         state.token=""
 
+    },
+    setOnlineUser:(state,action)=>{
+      state.onlineUser=action.payload
     }
     
   },
@@ -36,6 +40,6 @@ export const userSlice = createSlice({
 
 
 // Action creators are generated for each case reducer function
-export const {setUser,setToken,logout  } = userSlice.actions
+export const {setUser,setToken,logout,setOnlineUser  } = userSlice.actions
 
 export default userSlice.reducer

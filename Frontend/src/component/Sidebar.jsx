@@ -8,11 +8,13 @@ import { useSelector } from "react-redux";
 import EditUserDetail from "./EditUserDetail";
 import Divider from "./Divider";
 import { GoArrowUpLeft } from "react-icons/go";
+import SerchUser from "./SerchUser";
 
 function Sidebar() {
   const user = useSelector((state) => state?.user);
   const [editUserOpen, seteditUserOpen] = useState(false);
   const [allUser, setAllUser] = useState([]);
+  const [openSerchUser,setOpenSerchUser]=useState(false)
   return (
     <div className="h-full w-full grid grid-cols-[48px,1fr] bg-white">
       <div className="bg-slate-200 w-12 h-full rounded-tr-md rounded-br-md text-slate-700 flex flex-col justify-between">
@@ -28,6 +30,7 @@ function Sidebar() {
             <MdOutlineChat size={25} />
           </NavLink>
           <div
+          onClick={()=>setOpenSerchUser(true)}
             className="w-12 h-12 bg-red-400 flex justify-center items-center cursor-pointer hover:bg-slate-200 "
             title="Add Friend"
           >
@@ -45,7 +48,10 @@ function Sidebar() {
               hight={42}
               name={user.name}
               profile_pic={user?.profile_pic}
+              userID={user?._id}
+              
             />
+            
           </button>
           <button
             title="LogOut"
@@ -84,6 +90,10 @@ function Sidebar() {
       )}
 
       {
+        openSerchUser && (
+          <SerchUser onClose={()=>setOpenSerchUser(false)}/>
+
+        )
         
       }
     </div>

@@ -180,7 +180,8 @@ export const currentUser=AsyncHandler(async(req,res)=>{
   
   if(!token){
     return res.status(400).json({
-      message:"no token found"
+      message:"no token found",
+      logout:true
     })
   }
 
@@ -222,4 +223,28 @@ export const updateUserDetails=AsyncHandler(async(req,res)=>{
     data:userInfo,
     succes:true
   })
+})
+
+
+export const SearchUser=AsyncHandler(async(req,res)=>{
+  const{search}=req.body;
+  const queary=new RegExp(search,"i","g")
+
+
+  const user = await User.find({
+    '$or':[
+      {name:queary},
+      {email:queary}
+    ]
+      
+    
+  }).select("-password")
+  
+
+  return res.json({
+    message:'alluser',
+    data:user,
+    succes:true
+  })
+
 })

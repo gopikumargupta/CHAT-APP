@@ -1,7 +1,10 @@
 import React from 'react'
 import { FaRegCircleUser } from "react-icons/fa6";
+import { useSelector } from 'react-redux';
 
 function Avtar({userID,name,profile_pic,width,hight}) {
+    const onlineUser=useSelector(state=>state?.user?.onlineUser)
+    
     let avtarname=""
     if(name){
         const splitname=name?.split(" ")
@@ -23,9 +26,10 @@ function Avtar({userID,name,profile_pic,width,hight}) {
         'bg-pink-200'
     ]
     const random=Math.floor(Math.random()*7)
+    const isOnline=onlineUser.includes(userID)
     
   return (
-    <div style={{width:width+"px",height:hight+"px"}} className={`text-slate-800 overflow-hidden rounded-full shadow border  font-bold `} >
+    <div style={{width:width+"px",height:hight+"px"}} className={`text-slate-800  rounded-full shadow border  font-bold relative`} >
         
         {
             
@@ -49,6 +53,12 @@ function Avtar({userID,name,profile_pic,width,hight}) {
                     size={width}/>)
             )
             
+        }
+        {
+            
+            isOnline && (
+                <div className='bg-green-600 p-1 absolute bottom-2 -right-1 z-10 rounded-full'></div>
+            )
         }
       
     </div>

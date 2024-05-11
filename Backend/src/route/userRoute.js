@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { registerUSer,logout,checkEmail,cheakPassword,currentUser,updateUserDetails } from "../controller/user.controller.js"; 
+import { registerUSer,logout,checkEmail,cheakPassword,currentUser,updateUserDetails,SearchUser } from "../controller/user.controller.js"; 
 
 
 const router=Router()
@@ -22,6 +22,9 @@ router.route('/user-details').get(currentUser)
 router.route('/logout').get(logout)
 
 router.route('/update-details').post(updateUserDetails)
+
+
+router.route('/search-User').post(SearchUser)
 
 
 export default router;

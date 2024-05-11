@@ -1,7 +1,7 @@
 import React from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
-import { logout, setOnlineUser, setUser } from "../Redux/UserSlice";
+import { logout, setOnlineUser, setUser,setsocketConnection } from "../Redux/UserSlice";
 import { useEffect } from "react";
 import axios from "axios";
 import Sidebar from "../component/Sidebar";
@@ -13,18 +13,18 @@ function Home() {
   const dispatch = useDispatch();
   const Navigate = useNavigate();
   const location=useLocation();
-  console.log(user)
+  
 
   const feachUserDetail = async () => {
     const URL = `${import.meta.env.VITE_BACKEND_URL}/user-details`;
-    console.log(URL);
+    
 
     try {
       const response = await axios({
         url: URL,
         withCredentials: true,
       });
-      console.log("home",response)
+      
 
       dispatch(setUser(response.data.data));
 
@@ -51,9 +51,10 @@ function Home() {
     })
     socketConnection.on('onlineUser',(data)=>{
       
-      console.log(data)
+      
       dispatch(setOnlineUser(data))
     })
+    dispatch(setsocketConnection((socketConnection)))
     return()=>{
       socketConnection.disconnect()
     }

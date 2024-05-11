@@ -1,7 +1,7 @@
 import React from 'react'
 import { FaRegCircleUser } from "react-icons/fa6";
 
-function Avtar({userID,name,profile_url,width,hight}) {
+function Avtar({userID,name,profile_pic,width,hight}) {
     let avtarname=""
     if(name){
         const splitname=name?.split(" ")
@@ -26,10 +26,12 @@ function Avtar({userID,name,profile_url,width,hight}) {
     
   return (
     <div style={{width:width+"px",height:hight+"px"}} className={`text-slate-800 overflow-hidden rounded-full shadow border  font-bold `} >
+        
         {
-            profile_url?(
+            
+            profile_pic ? (
                 <img
-                src={profile_url} 
+                src={profile_pic} 
                 width={width}
                 hight={hight}
                 alt={name}
@@ -46,6 +48,7 @@ function Avtar({userID,name,profile_url,width,hight}) {
                 ):(<FaRegCircleUser 
                     size={width}/>)
             )
+            
         }
       
     </div>

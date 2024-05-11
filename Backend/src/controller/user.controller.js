@@ -219,6 +219,7 @@ export const updateUserDetails=AsyncHandler(async(req,res)=>{
 
   return res.status(200).json({
     message:"user updated succesfully",
-    data:userInfo
+    data:userInfo,
+    succes:true
   })
 })

@@ -1,20 +1,27 @@
-import React, { useState,useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Avtar from "./Avtar";
 import { uploadFile } from "../helpers/uploadFiles.js";
+import Divider from "./Divider.jsx";
+import axios from'axios'
+import toast from 'react-hot-toast'
+import { useDispatch } from "react-redux";
+import {setUser} from '../Redux/UserSlice.jsx'
 
 function EditUserDetail({ onClose, user }) {
   const [data, setData] = useState({
     name: user?.user,
     profile_pic: user.profile_pic,
   });
-  useEffect(()=>{
-    setData((preve)=>{
-        return{
-            ...preve,
-            ...user
-        }
-    })
-},[user])
+  const uploadPhotoRef=useRef()
+  const dispatch=useDispatch()
+  useEffect(() => {
+    setData((preve) => {
+      return {
+        ...preve,
+        ...user,
+      };
+    });
+  }, [user]);
   const handleOnchange = (e) => {
     const { name, value } = e.target;
 
@@ -35,11 +42,42 @@ function EditUserDetail({ onClose, user }) {
         profile_pic: uploadPhoto?.url,
       };
     });
+    
   };
   const handleSubmet = async (e) => {
     e.preventDefault();
     e.stopPropagation();
+    try {
+
+      const URL = `${import.meta.env.VITE_BACKEND_URL}/update-details`;
+      const response= await axios({
+        method:'post',
+        url:URL,
+        data:data,
+        withCredentials:true
+        
+
+
+      })
+      console.log(response)
+      toast.success(response?.data?.message)
+      if(response?.data?.succes){
+        
+        dispatch(setUser(response?.data?.data))
+        onClose()
+      }
+      
+      
+    } catch (error) {
+      console.log(error)
+      toast.error(error?.response?.data?.message)
+      
+    }
   };
+  const handleOpenUploadPhoto=()=>{
+    uploadPhotoRef.current.click()
+
+  }
   return (
     <div className="fixed top-0 bottom-0 left-0 right-0 bg-gray-700 bg-opacity-40 flex justify-center items-center">
       <div className="bg-white p-4 py-6 m-1 rounded w-full max-w-sm">
@@ -59,27 +97,41 @@ function EditUserDetail({ onClose, user }) {
             />
           </div>
           <div>
-            <label htmlFor="profile_pic">Photo:</label>
+            <div>Photo:</div>
+
             <div className="my-1 flex items-center gap-3">
               <Avtar
                 width={40}
                 hight={40}
-                imageUrl={data?.profile_pic}
+                profile_pic={data?.profile_pic}
                 name={data?.name}
               />
-              <button className="font-semibold">Change Photo</button>
-              <input
-                type="file"
-                className="hidden"
-                onChange={handleUploadPhoto}
-              />
+              <label htmlFor="profile_pic">
+                <button className="font-semibold" onClick={handleOpenUploadPhoto}>Change Photo</button>
+                <input
+                  type="file"
+                  id="profile_pic"
+                  className="hidden"
+                  onChange={handleUploadPhoto}
+                  ref={uploadPhotoRef}
+                />
+              </label>
             </div>
           </div>
+          <Divider />
           <div className="flex w-fit ml-auto mt-2">
-            <button className="border-red-300 bg-sky-400 text-white border px-4 py-1 mr-2 rounded-xl hover:bg-red-500">
+            <button
+              onClick={onClose}
+              className="border-red-300 bg-sky-400 text-white border px-4 py-1 mr-2 rounded-xl hover:bg-red-500"
+            >
               Cancle
             </button>
-            <button className="border-red-300 bg-sky-400 text-white border px-4 py-1 rounded-xl hover:bg-green-500">
+            <button
+              onClick={handleSubmet}
+              
+              
+              className="border-red-300 bg-sky-400 text-white border px-4 py-1 rounded-xl hover:bg-green-500"
+            >
               Save
             </button>
           </div>

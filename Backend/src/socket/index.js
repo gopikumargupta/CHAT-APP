@@ -3,6 +3,8 @@ import { Server } from "socket.io";
 import http from "http";
 import { getUserDetailsfromcookie } from "../middleware/getUserFromCookie.js";
 import { User } from "../module/user.module.js";
+import {conversation} from '../module/conversation.module.js'
+import {message} from '../module/message.module.js'
 
 ////////Socket connection////////
 
@@ -40,6 +42,70 @@ io.on("connection", async (socket) => {
     };
     socket.emit("message-user", payload);
   });
+
+  //new message
+  socket.on('new message',async(data)=>{
+    //cheak conversation is avilable in both user?
+
+    let conversa = await conversation.findOne({
+      "$or":[
+        {
+          sender:data?.sender,
+          receiver:data?.receiver
+        },
+        {
+          sender:data?.receiver,
+          receiver:data?.sender
+        }
+      ]
+    })
+    console.log("con1",conversa)
+
+    if(!conversa){
+      const CreateConversation=await conversation.create({
+        sender:data?.sender,
+        receiver:data?.receiver
+
+
+      })
+      conversa= await CreateConversation.save()
+
+    }
+    const massage =await message({
+          
+          text:data.text,
+          imageUrl:data.imageUrl,
+          video:data.video,
+          msgByUserId:data.msgByUserId
+    })
+    const savemessage= await massage.save()
+
+    const updateconversation= await conversation.updateOne({_id:conversa?._id},{
+      "$push":{message:savemessage?._id}
+    })
+
+    const getConversationMessage=await conversation.findOne({
+      "$or":[
+        {
+          sender:data?.sender,
+          receiver:data?.receiver
+        },
+        {
+          sender:data?.receiver,
+          receiver:data?.sender
+        }
+      ]
+
+    }).populate('message').sort({updatedAt:-1})
+
+    io.to(data?.sender).emit('message',getConversationMessage.message)
+    io.to(data?.receiver).emit('message',getConversationMessage.message)
+
+    console.log("get conversation",getConversationMessage)
+    
+    
+
+  })
 
   //disconnect
   socket.on("disconnect", () => {

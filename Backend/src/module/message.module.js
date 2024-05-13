@@ -17,6 +17,11 @@ const massageSchema=new  mongoose.Schema({
     seen:{
         type:Boolean,
         default:false
+    },
+    msgByUserId:{
+        type:mongoose.Schema.Types.ObjectId,
+        require :true,
+        ref:"user"
     }
 
 },{timestamps:true})

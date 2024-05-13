@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { MdOutlineChat } from "react-icons/md";
 import { FaUserPlus } from "react-icons/fa6";
 import { NavLink } from "react-router-dom";
@@ -10,11 +10,28 @@ import Divider from "./Divider";
 import { GoArrowUpLeft } from "react-icons/go";
 import SerchUser from "./SerchUser";
 
+
 function Sidebar() {
   const user = useSelector((state) => state?.user);
   const [editUserOpen, seteditUserOpen] = useState(false);
   const [allUser, setAllUser] = useState([]);
   const [openSerchUser,setOpenSerchUser]=useState(false)
+  const SocketConnection =useSelector(state=>state?.user?.socketConnection)
+
+  useEffect(()=>{
+    if(SocketConnection){
+      SocketConnection.emit('sidebar',user?._id)
+
+
+
+      SocketConnection.on('conversation',(data)=>{
+        console.log("sideeeeee",data?.sender)
+      })
+    }
+    
+
+
+  },[SocketConnection,user])
   return (
     <div className="h-full w-full grid grid-cols-[48px,1fr] bg-white">
       <div className="bg-slate-200 w-12 h-full rounded-tr-md rounded-br-md text-slate-700 flex flex-col justify-between">

@@ -8,8 +8,9 @@ import { useDispatch } from "react-redux";
 import {setUser} from '../Redux/UserSlice.jsx'
 
 function EditUserDetail({ onClose, user }) {
+  console.log(user)
   const [data, setData] = useState({
-    name: user?.user,
+    name: user?.name,
     profile_pic: user.profile_pic,
   });
   const uploadPhotoRef=useRef()
@@ -36,7 +37,7 @@ function EditUserDetail({ onClose, user }) {
     const file = e.target.files[0];
     const uploadPhoto = await uploadFile(file);
 
-    setData((prev) => {
+    setData(prev => {
       return {
         ...prev,
         profile_pic: uploadPhoto?.url,
@@ -50,15 +51,17 @@ function EditUserDetail({ onClose, user }) {
     try {
 
       const URL = `${import.meta.env.VITE_BACKEND_URL}/update-details`;
-      const response= await axios({
-        method:'post',
-        url:URL,
-        data:data,
-        withCredentials:true
+      const response = await axios({
+        method : 'post',
+        url : URL,
+        data : data,
+        withCredentials : true
+    })
+        
         
 
 
-      })
+      
       console.log(response)
       toast.success(response?.data?.message)
       if(response?.data?.succes){
@@ -69,8 +72,9 @@ function EditUserDetail({ onClose, user }) {
       
       
     } catch (error) {
-      console.log(error)
       toast.error(error?.response?.data?.message)
+      console.log(error)
+      
       
     }
   };

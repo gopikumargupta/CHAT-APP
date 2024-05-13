@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
 import Avtar from "../component/Avtar";
@@ -12,18 +12,20 @@ import { uploadFile } from "../helpers/uploadFiles.js";
 import { ImCross } from "react-icons/im";
 import backgroundImage from "../assets/Back.jpeg";
 import { BsFillSendFill } from "react-icons/bs";
-import moment from 'moment'
-
-
-
-
-
-
+import moment from "moment";
 
 function Message() {
   const params = useParams();
   const user = useSelector((state) => state.user);
-  
+  const [allmessage, setAllmessage] = useState([]);
+  const currentMsg = useRef(null);
+
+  useEffect(() => {
+    if (currentMsg.current) {
+      currentMsg.current.scrollIntoView({ behavior: "smooth", block: "end" });
+    }
+  }, [allmessage]);
+
   const [message, setMessage] = useState({
     text: "",
     imageUrl: "",
@@ -75,8 +77,7 @@ function Message() {
     online: false,
   });
   const [openimgVideo, setOpenimgVideo] = useState(false);
-  const [allmessage,setAllmessage]=useState([])
-  
+
   useEffect(() => {
     if (socketConnection) {
       socketConnection.emit("message-page", params.userId);
@@ -84,18 +85,16 @@ function Message() {
       socketConnection.on("message-user", (data) => {
         setUserData(data);
       });
-      socketConnection.on('message',(data)=>{
-        console.log("message data",data)
-        setAllmessage(data)
-      })
-      
-      
+      socketConnection.on("message", (data) => {
+        console.log("message data", data);
+        setAllmessage(data);
+      });
     }
   }, [socketConnection, params?.userId, user]);
   const handleOnchange = (e) => {
-    const  value  = e.target.value;
+    const value = e.target.value;
 
-    setMessage(prev => {
+    setMessage((prev) => {
       return {
         ...prev,
         text: value,
@@ -104,28 +103,26 @@ function Message() {
   };
 
   // sending message from here
-  const HandleSubmet=(e)=>{
-    e.preventDefault()
-    if(message.text||message.imageUrl||message.video){
-      if(socketConnection){
-        socketConnection.emit('new message',{
-          sender:user?._id,
-          receiver:params.userId,
-          text:message.text,
-          imageUrl:message.imageUrl,
-          video:message.video,
-          msgByUserId:user?._id
-      })
+  const HandleSubmet = (e) => {
+    e.preventDefault();
+    if (message.text || message.imageUrl || message.video) {
+      if (socketConnection) {
+        socketConnection.emit("new message", {
+          sender: user?._id,
+          receiver: params.userId,
+          text: message.text,
+          imageUrl: message.imageUrl,
+          video: message.video,
+          msgByUserId: user?._id,
+        });
       }
       setMessage({
         text: "",
         imageUrl: "",
         video: "",
-      })
+      });
     }
-
-
-  }
+  };
 
   return (
     <div
@@ -165,9 +162,45 @@ function Message() {
           </button>
         </div>
       </header>
-      {/* Show all message filed*/}
 
-      <section className="h-[calc(100vh-128px)] overflow-x-hidden overflow-y-scroll bg-slate-200 opacity-35">
+      <section className="h-[calc(100vh-128px)] overflow-x-hidden overflow-y-scroll bg-white-300 opacity-55">
+        {/*All message Shows Here*/}
+
+        <div className="flex flex-col gap-2 py-2 mx-2" ref={currentMsg}>
+          {allmessage.map((msg, i) => {
+            return (
+              <div
+                className={`p-1 py-1 my-2 rounded w-fit max-w-[280px] md:max-w-sm lg:max-w-md ${
+                  user?._id === msg.msgByUserId
+                    ? "ml-auto bg-green-900"
+                    : "bg-white"
+                }`}
+              >
+                <div className="w-full">
+                  {msg.imageUrl && (
+                    <img
+                      className="w-full h-full object-scale-down"
+                      src={msg.imageUrl}
+                    />
+                  )}
+                </div>
+                <div className="w-full">
+                  {msg.video && (
+                    <video
+                      className="w-full h-full object-scale-down"
+                      src={msg.video}
+                      controls
+                    />
+                  )}
+                </div>
+                <p className="px-2 py-1 ">{msg.text}</p>
+                <p className="text-xs ml-auto w-fit">
+                  {moment(msg.createdAt).format("hh:mm")}
+                </p>
+              </div>
+            );
+          })}
+        </div>
         {/* upload image display*/}
         {message.imageUrl && (
           <div className="w-full h-full bg-slate-700 bg-opacity-30 flex justify-center items-center overflow-hidden relative">
@@ -186,7 +219,7 @@ function Message() {
             </div>
           </div>
         )}
-        
+
         {message.video && (
           <div className="w-full h-full bg-slate-700 bg-opacity-30 flex justify-center items-center overflow-hidden relative">
             <div
@@ -206,21 +239,10 @@ function Message() {
             </div>
           </div>
         )}
-        {/*All message Shows Here*/}
-        <div className="flex flex-col gap-2">
-          {
-          allmessage.map((msg,i)=>{
-            return(
-              <div className={`bg-green-500 p-1 py-1 rounded w-fit ${user?.id===msg.msgByUserId ? "":'ml-auto'}`}>
-                <p className="px-2">{msg.text}</p>
-                <p className="text-xs ml-auto w-fit">{moment(msg.createdAt).format('hh:mm')}</p>
-
-              </div>
-            )
-          })
-          }
-        </div>
       </section>
+
+      {/* Show all message filed*/}
+
       {/* Send Massage filed*/}
 
       <section className="h-16 bg-white flex items-center px-4">
@@ -279,8 +301,7 @@ function Message() {
             onChange={handleOnchange}
           />
           <button className="text-sky-400 hover:text-green-600">
-            <BsFillSendFill size={28}/>
-
+            <BsFillSendFill size={28} />
           </button>
         </form>
       </section>

@@ -3,8 +3,8 @@ import { Server } from "socket.io";
 import http from "http";
 import { getUserDetailsfromcookie } from "../middleware/getUserFromCookie.js";
 import { User } from "../module/user.module.js";
-import {conversation} from '../module/conversation.module.js'
-import {message} from '../module/message.module.js'
+import { conversation } from "../module/conversation.module.js";
+import { message } from "../module/message.module.js";
 
 ////////Socket connection////////
 
@@ -38,73 +38,125 @@ io.on("connection", async (socket) => {
       _id: UserDetails?._id,
       email: UserDetails?.email,
       online: onlineUser.has(userId),
-      profile_pic:UserDetails?.profile_pic
+      profile_pic: UserDetails?.profile_pic,
     };
     socket.emit("message-user", payload);
+
+
+
+
+    //prev msg
+    const getConversationMessage = await conversation.findOne({
+      $or: [
+        { sender: user?._id, receiver: userId },
+        { sender: userId, receiver: user?._id },
+      ],
+    })
+      .populate('message')
+      .sort({ updatedAt: -1 });
+
+    socket.emit("message", getConversationMessage?.message || []);
   });
 
+  
+
   //new message
-  socket.on('new message',async(data)=>{
+  socket.on("new message", async (data) => {
     //cheak conversation is avilable in both user?
 
     let conversa = await conversation.findOne({
-      "$or":[
+      $or: [
         {
-          sender:data?.sender,
-          receiver:data?.receiver
+          sender: data?.sender,
+          receiver: data?.receiver,
         },
         {
-          sender:data?.receiver,
-          receiver:data?.sender
-        }
-      ]
-    })
-    console.log("con1",conversa)
+          sender: data?.receiver,
+          receiver: data?.sender,
+        },
+      ],
+    });
+    console.log("con1", conversa);
 
-    if(!conversa){
-      const CreateConversation=await conversation.create({
-        sender:data?.sender,
-        receiver:data?.receiver
-
-
-      })
-      conversa= await CreateConversation.save()
-
+    if (!conversa) {
+      const CreateConversation = await conversation.create({
+        sender: data?.sender,
+        receiver: data?.receiver,
+      });
+      conversa = await CreateConversation.save();
     }
-    const massage =await message({
-          
-          text:data.text,
-          imageUrl:data.imageUrl,
-          video:data.video,
-          msgByUserId:data.msgByUserId
-    })
-    const savemessage= await massage.save()
+    const massage = await message({
+      text: data.text,
+      imageUrl: data.imageUrl,
+      video: data.video,
+      msgByUserId: data.msgByUserId,
+    });
+    const savemessage = await massage.save();
 
-    const updateconversation= await conversation.updateOne({_id:conversa?._id},{
-      "$push":{message:savemessage?._id}
-    })
+    const updateconversation = await conversation.updateOne(
+      { _id: conversa?._id },
+      {
+        $push: { message: savemessage?._id },
+      }
+    );
 
-    const getConversationMessage=await conversation.findOne({
-      "$or":[
-        {
-          sender:data?.sender,
-          receiver:data?.receiver
-        },
-        {
-          sender:data?.receiver,
-          receiver:data?.sender
+    const getConversationMessage = await conversation
+      .findOne({
+        $or: [
+          {
+            sender: data?.sender,
+            receiver: data?.receiver,
+          },
+          {
+            sender: data?.receiver,
+            receiver: data?.sender,
+          },
+        ],
+      })
+      .populate("message")
+      .sort({ updatedAt: -1 });
+
+    io.to(data?.sender).emit("message", getConversationMessage?.message||[]);
+    io.to(data?.receiver).emit("message", getConversationMessage?.message||[]);
+
+   
+  });
+
+
+
+  //sidebar
+
+
+  socket.on('sidebar',async(curentUserID)=>{
+    console.log('sidebar',curentUserID)
+    if(curentUserID){
+      const currentUserConversation= await conversation.find({
+        "$or":[
+          {sender:curentUserID},
+          {receiver:curentUserID}
+  
+        ]
+      }).sort({  updatedAt : -1 }).populate('message').populate('sender').populate('receiver')
+
+
+      
+      console.log('mmmmm',currentUserConversation)
+      const conversationMsg=currentUserConversation.map((msg)=>{
+        const countUnseenMsg=msg.message.reduce((prev,curr)=> prev +(curr.seen ? 0:1),0)
+        return{
+          _id:msg?._id,
+          sender:msg?.sender,
+          receiver:msg?.receiver,
+          unseenMsg:countUnseenMsg,
+          lastMsg:msg.message[msg?.message?.length-1]
+  
         }
-      ]
+  
+      })
+      socket.emit('conversation',conversationMsg||[])
+    }
 
-    }).populate('message').sort({updatedAt:-1})
-
-    io.to(data?.sender).emit('message',getConversationMessage.message)
-    io.to(data?.receiver).emit('message',getConversationMessage.message)
-
-    console.log("get conversation",getConversationMessage)
     
-    
-
   })
 
   //disconnect

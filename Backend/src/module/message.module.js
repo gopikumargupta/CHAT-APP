@@ -19,9 +19,9 @@ const massageSchema=new  mongoose.Schema({
         default:false
     },
     msgByUserId:{
-        type:mongoose.Schema.Types.ObjectId,
+        type:mongoose.Schema.ObjectId,
         require :true,
-        ref:"user"
+        ref:"User"
     }
 
 },{timestamps:true})

@@ -43,8 +43,7 @@ function CheckpasswordPage() {
     const URL = `${import.meta.env.VITE_BACKEND_URL}/password`;
 
     try {
-      console.log(location?.state?._id),
-      console.log(data.password)
+      
         const response = await axios({
           method :'post',
           url : URL,

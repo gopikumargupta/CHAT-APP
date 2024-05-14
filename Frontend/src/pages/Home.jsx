@@ -13,13 +13,22 @@ function Home() {
   const dispatch = useDispatch();
   const Navigate = useNavigate();
   const location=useLocation();
+
+  if(user.token==""){
+    Navigate('/email')
+  }
   
 
   const feachUserDetail = async () => {
+
+    
     const URL = `${import.meta.env.VITE_BACKEND_URL}/user-details`;
+
+
     
 
     try {
+
       const response = await axios({
         url: URL,
         withCredentials: true,
@@ -27,6 +36,8 @@ function Home() {
       
 
       dispatch(setUser(response.data.data));
+      
+      
 
       if (response.data.data.logout) {
         dispatch(logout());

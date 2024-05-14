@@ -5,6 +5,7 @@ import { getUserDetailsfromcookie } from "../middleware/getUserFromCookie.js";
 import { User } from "../module/user.module.js";
 import { conversation } from "../module/conversation.module.js";
 import { message } from "../module/message.module.js";
+import { getConversation } from "../middleware/getConversation.js";
 
 ////////Socket connection////////
 
@@ -119,6 +120,19 @@ io.on("connection", async (socket) => {
     io.to(data?.sender).emit("message", getConversationMessage?.message||[]);
     io.to(data?.receiver).emit("message", getConversationMessage?.message||[]);
 
+
+
+    ///send conversation function
+
+    const conversationSender=await getConversation(data?.sender)
+    const conversationReciver=await getConversation(data?.sender)
+
+    io.to(data?.sender).emit("conversation", conversationSender);
+    io.to(data?.receiver).emit("conversation", conversationReciver);
+
+
+
+
    
   });
 
@@ -129,34 +143,36 @@ io.on("connection", async (socket) => {
 
   socket.on('sidebar',async(curentUserID)=>{
     console.log('sidebar',curentUserID)
-    if(curentUserID){
-      const currentUserConversation= await conversation.find({
-        "$or":[
-          {sender:curentUserID},
-          {receiver:curentUserID}
-  
-        ]
-      }).sort({  updatedAt : -1 }).populate('message').populate('sender').populate('receiver')
 
-
-      
-      console.log('mmmmm',currentUserConversation)
-      const conversationMsg=currentUserConversation.map((msg)=>{
-        const countUnseenMsg=msg.message.reduce((prev,curr)=> prev +(curr.seen ? 0:1),0)
-        return{
-          _id:msg?._id,
-          sender:msg?.sender,
-          receiver:msg?.receiver,
-          unseenMsg:countUnseenMsg,
-          lastMsg:msg.message[msg?.message?.length-1]
-  
-        }
-  
-      })
-      socket.emit('conversation',conversationMsg||[])
-    }
+    const conversationMsg= await getConversation(curentUserID)
+    
+    socket.emit('conversation',conversationMsg||[])
 
     
+  })
+
+  socket.on('seen', async(MsgbyUserId)=>{
+
+    const seenConversation=await conversation.findOne({
+      $or: [
+        { sender: user?._id, receiver: MsgbyUserId },
+        { sender: MsgbyUserId, receiver: user?._id },
+      ],
+
+    })
+    const conversationSeenId= seenConversation?.message||[]
+
+    const updatMessage=await message.updateMany(
+      {_id:{'$in':conversationSeenId},msgByUserId : MsgbyUserId},
+      {"$set":{seen:true}}
+    )
+
+    const conversationSender=await getConversation(user?._id?.toString())
+    const conversationReciver=await getConversation(MsgbyUserId)
+
+    io.to(user?._id?.toString()).emit("conversation", conversationSender);
+    io.to(MsgbyUserId).emit("conversation", conversationReciver);
+
   })
 
   //disconnect

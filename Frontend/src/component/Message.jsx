@@ -81,6 +81,7 @@ function Message() {
   useEffect(() => {
     if (socketConnection) {
       socketConnection.emit("message-page", params.userId);
+      socketConnection.emit('seen',params.userId)
 
       socketConnection.on("message-user", (data) => {
         setUserData(data);
@@ -89,6 +90,8 @@ function Message() {
         console.log("message data", data);
         setAllmessage(data);
       });
+
+
     }
   }, [socketConnection, params?.userId, user]);
   const handleOnchange = (e) => {
@@ -166,7 +169,7 @@ function Message() {
       <section className="h-[calc(100vh-128px)] overflow-x-hidden overflow-y-scroll bg-white-300 opacity-55">
         {/*All message Shows Here*/}
 
-        <div className="flex flex-col gap-2 py-2 mx-2" ref={currentMsg}>
+        <div className="flex flex-col gap-2 py-2 mx-2 font-bold" ref={currentMsg}>
           {allmessage.map((msg, i) => {
             return (
               <div

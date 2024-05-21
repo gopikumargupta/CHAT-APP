@@ -19,7 +19,7 @@ const io = new Server(server, {
 const onlineUser = new Set();
 
 io.on("connection", async (socket) => {
-  console.log("connect User", socket.id);
+  
 
   const token = socket.handshake.auth.token;
 
@@ -31,7 +31,7 @@ io.on("connection", async (socket) => {
 
   io.emit("onlineUser", Array.from(onlineUser));
   socket.on("message-page", async (userId) => {
-    console.log("user_id", userId);
+    
     const UserDetails = await User.findById(userId).select("-password");
 
     const payload = {
@@ -77,7 +77,7 @@ io.on("connection", async (socket) => {
         },
       ],
     });
-    console.log("con1", conversa);
+    
 
     if (!conversa) {
       const CreateConversation = await conversation.create({
@@ -142,7 +142,7 @@ io.on("connection", async (socket) => {
 
 
   socket.on('sidebar',async(curentUserID)=>{
-    console.log('sidebar',curentUserID)
+   
 
     const conversationMsg= await getConversation(curentUserID)
     

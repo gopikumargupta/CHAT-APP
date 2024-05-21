@@ -10,7 +10,7 @@ const getConversation = async (curentUserID) => {
       .populate("sender")
       .populate("receiver");
 
-    console.log("mmmmm", currentUserConversation);
+    
     const conversationMsg = currentUserConversation.map((msg) => {
       const countUnseenMsg = msg.message.reduce(
         (prev, curr) => {

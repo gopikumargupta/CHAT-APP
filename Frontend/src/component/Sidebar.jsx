@@ -12,6 +12,7 @@ import SerchUser from "./SerchUser";
 import { BsImage } from "react-icons/bs";
 import { FaVideo } from "react-icons/fa6";
 import { logout } from "../Redux/UserSlice";
+import axios from "axios";
 
 function Sidebar() {
   const user = useSelector((state) => state?.user);
@@ -23,6 +24,7 @@ function Sidebar() {
   );
   const dispatch=useDispatch()
   const navigate =useNavigate()
+  console.log(user)
 
   useEffect(() => {
     if (SocketConnection) {
@@ -60,6 +62,9 @@ function Sidebar() {
     dispatch(logout())
     navigate('/email')
     localStorage.clear()
+    const URL=`${import.meta.env.VITE_BACKEND_URL}/logout`;
+    
+    axios.get(URL)
     
   }
   return (

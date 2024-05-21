@@ -51,7 +51,7 @@ function Registerpage() {
     const url=`${import.meta.env.VITE_BACKEND_URL}/singup`
     try {
       const response= await axios.post(url,data)
-      console.log(response)
+      
       toast.success(response.data.message)
       if(response.data.succes){
         setData(

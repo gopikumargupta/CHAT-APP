@@ -1,11 +1,10 @@
 import { getUserDetailsfromcookie } from "../middleware/getUserFromCookie.js";
 import { User } from "../module/user.module.js";
 import { AsyncHandler } from "../utils/asyncHandler.js";
-import jwt from 'jsonwebtoken'
+import jwt from "jsonwebtoken";
 
 export const generateAccessAndRefereshToken = async (userID) => {
   try {
-    
     const user = await User.findOne(userID);
 
     const accesstoken = user.genrateAccesToken();
@@ -143,7 +142,6 @@ export const cheakPassword = AsyncHandler(async (req, res) => {
   const { password, userID } = req.body;
 
   const user = await User.findById(userID);
-  
 
   if (!user) {
     return res.status(400).json({
@@ -156,95 +154,95 @@ export const cheakPassword = AsyncHandler(async (req, res) => {
       message: "passwword is wrong ",
     });
   }
-  const tokendata={
-    id:user._id,
-    email:user.email
-  }
+  const tokendata = {
+    id: user._id,
+    email: user.email,
+  };
 
-  const token=await jwt.sign(tokendata,process.env.ACCESS_TOKEN_SECRET,{expiresIn:process.env.ACCESS_TOKEN_EXPIRY})
+  const token = await jwt.sign(tokendata, process.env.ACCESS_TOKEN_SECRET, {
+    expiresIn: process.env.ACCESS_TOKEN_EXPIRY,
+  });
 
-
-  const opsation={
-    http:true,
-    secure:true
-  }
-  return res.cookie('token',token,opsation).status(200).json({
+  const opsation = {
+    http: true,
+    secure: true,
+  };
+  return res.cookie("token", token, opsation).status(200).json({
     message: "login succesfully",
     token: token,
     succes: true,
   });
 });
-
-export const currentUser=AsyncHandler(async(req,res)=>{
-  const token=req.cookies?.token||""
+export const updateUserDetails = AsyncHandler(async (req, res) => {
+  const token = req.cookies.token || "";
+  const user = await getUserDetailsfromcookie(token);
   
-  if(!token){
+
+  console.log("userRR", user);
+
+  const { name, profile_pic } = req.body;
+
+  const updateduser = await User.updateOne(
+    { _id: user.id },
+    { name, profile_pic }
+  );
+
+  const userInfo = await User.findById(user._id).select("-password");
+  if(!userInfo){
+    return res.status(200).json({
+      message: "user info not found",
+      data: null,
+      succes: false,
+    });
+
+  }
+
+  return res.status(200).json({
+    message: "user updated succesfully",
+    data: userInfo,
+    succes: true,
+  });
+});
+
+export const currentUser = AsyncHandler(async (req, res) => {
+  const token = req.cookies?.token || "";
+
+  if (!token) {
     return res.status(400).json({
-      message:"no token found",
-      logout:true
-    })
+      message: "no token found",
+      logout: true,
+    });
   }
 
-  const user = await getUserDetailsfromcookie(token)
+  const user = await getUserDetailsfromcookie(token);
   return res.status(200).json({
-    message:"user found succesfully",
-    data:user
-  })
+    message: "user found succesfully",
+    data: user,
+  });
+});
 
+export const logout = AsyncHandler(async (req, res) => {
+  const opsation = {
+    http: true,
+    secure: true,
+  };
+  return res.cookie("token", "", opsation).status(200).json({
+    message: "logoutsucces fully",
+    succes: true,
+  });
+});
 
-})
-
-export const logout=AsyncHandler(async(req,res)=>{
-
-  const opsation={
-    http:true,
-    secure:true
-
-  }
-  return res.cookie('token','',opsation).status(200).json({
-    message:"logout succes fully",
-    succes:true
-  })
-})
-
-
-export const updateUserDetails=AsyncHandler(async(req,res)=>{
-  const token=req.cookies.token||""
-  const user=await getUserDetailsfromcookie(token)
-
-  const {name,profile_pic}=req.body;
-
-  const updateduser=await User.updateOne({_id:user.id},{name,profile_pic})
-
-  const userInfo=await User.findById(user._id).select("-password")
-
-  return res.status(200).json({
-    message:"user updated succesfully",
-    data:userInfo,
-    succes:true
-  })
-})
-
-
-export const SearchUser=AsyncHandler(async(req,res)=>{
-  const{search}=req.body;
-  const queary=new RegExp(search,"i","g")
-
+export const SearchUser = AsyncHandler(async (req, res) => {
+  const { search } = req.body;
+  const queary = new RegExp(search, "i", "g");
 
   const user = await User.find({
-    '$or':[
-      {name:queary},
-      {email:queary}
-    ]
-      
-    
-  }).select("-password")
-  
+    $or: [{ name: queary }, { email: queary }],
+  }).select("-password");
 
   return res.json({
-    message:'alluser',
-    data:user,
-    succes:true
-  })
-
-})
+    message: "alluser",
+    data: user,
+    succes: true,
+  });
+});

@@ -6,13 +6,16 @@ import axios from'axios'
 import toast from 'react-hot-toast'
 import { useDispatch } from "react-redux";
 import {setUser} from '../Redux/UserSlice.jsx'
+import { json } from "react-router-dom";
 
 function EditUserDetail({ onClose, user }) {
-  console.log(user)
-  const [data, setData] = useState({
+  
+  const [data, setData] = useState([{
     name: user?.name,
     profile_pic: user.profile_pic,
-  });
+  }]);
+  console.log(user)
+  
   const uploadPhotoRef=useRef()
   const dispatch=useDispatch()
   useEffect(() => {
@@ -51,12 +54,25 @@ function EditUserDetail({ onClose, user }) {
     try {
 
       const URL = `${import.meta.env.VITE_BACKEND_URL}/update-details`;
-      const response = await axios({
-        method : 'post',
-        url : URL,
-        data : data,
-        withCredentials : true
-    })
+      console.log(data)
+      
+      
+
+      
+      
+     
+      const response= await axios({
+        method:"post",
+        url:URL,
+        data:data[0],
+        withCredentials:true
+      }
+        
+      )
+      
+
+      
+
         
         
 
